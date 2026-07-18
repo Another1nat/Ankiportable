@@ -6,7 +6,7 @@
 
 Open an `.apkg`. Study. That's it — no account, no sync server, no install.
 
-### 🌐 **Live site → [another1nat.github.io/Ankiportable](https://another1nat.github.io/Ankiportable/)**
+### ➡️➡️➡️➡️ **Live site → [another1nat.github.io/Ankiportable](https://another1nat.github.io/Ankiportable/)**
 
 [📱 Install on iPhone](#-install-on-your-phone) · [🤖 Install on Android](#-install-on-your-phone) · [💻 Run locally](#-run-it-locally) · [☁️ Deploy your own](#-deploy)
 
