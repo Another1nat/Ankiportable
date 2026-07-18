@@ -757,8 +757,24 @@ async function startStudy(deckId) {
   const { deck, mediaBlobs } = loaded;
   resetTodayCountsIfNewDay(deck);
 
-  const queue = Scheduler.buildQueue(deck.cardStates, state.settings.newDailyCap, deck.todayCounts);
-  const order = [...queue.learning, ...queue.review, ...queue.newCards];
+  // Try to resume a saved session (queue + index) from the library entry, so
+  // if the tab was closed mid-session the user can pick up where they left off.
+  const libEntry = state.library.find((e) => e.id === deckId);
+  const saved = libEntry?.savedSession;
+  const validSaved =
+    saved && Array.isArray(saved.queue) && saved.queue.length > 0
+    && saved.queue.every((cid) => deck.cardStates[cid])
+    && saved.index >= 0 && saved.index < saved.queue.length;
+
+  let order, initialNewCount;
+  if (validSaved) {
+    order = saved.queue.slice();
+    initialNewCount = saved.initialNewCount || 0;
+  } else {
+    const queue = Scheduler.buildQueue(deck.cardStates, state.settings.newDailyCap, deck.todayCounts);
+    order = [...queue.learning, ...queue.review, ...queue.newCards];
+    initialNewCount = queue.newCards.length;
+  }
   if (!order.length) { hideLoading(); return; }
 
   updateLoading('Preparing media…');
@@ -773,19 +789,67 @@ async function startStudy(deckId) {
     correct: 0,
     timeMs: 0,
     queue: order,
-    index: 0,
+    index: validSaved ? saved.index : 0,
     showingAnswer: false,
     flippedAtMs: null,
     gradedBreakdown: { 0: 0, 1: 0, 2: 0, 3: 0 },
     totalPlanned: order.length,
-    initialNewCount: queue.newCards.length,
+    initialNewCount,
     lastGrade: null,   // snapshot for undo
+    resumed: validSaved,
   };
   updateUndoButton();
   showScreen('study');
   updateSessionRemainingDisplay();
   renderCurrentCard();
   hideLoading();
+}
+
+// Persist enough of the session that a reload can resume it. Called after
+// each grade and after slider jumps. Debounced through IndexedDB itself
+// (put is fast — no need for a manual debounce).
+async function persistSessionProgress() {
+  const sess = state.session;
+  const deck = state.currentDeck;
+  if (!sess || !deck) return;
+  await Storage.updateLibraryEntry(deck.id, (rec) => {
+    rec.savedSession = {
+      queue: sess.queue.slice(),
+      index: sess.index,
+      initialNewCount: sess.initialNewCount,
+      savedAt: new Date().toISOString(),
+    };
+    return rec;
+  });
+}
+
+async function clearSessionProgress(deckId) {
+  if (!deckId) return;
+  await Storage.updateLibraryEntry(deckId, (rec) => { rec.savedSession = null; return rec; });
+}
+
+function jumpToIndex(target) {
+  const sess = state.session;
+  if (!sess) return;
+  const t = Math.max(0, Math.min(sess.queue.length - 1, target));
+  if (t === sess.index && !sess.showingAnswer) return;
+  sess.index = t;
+  sess.showingAnswer = false;
+  sess.lastGrade = null;   // undo doesn't cross a manual jump
+  updateUndoButton();
+  renderCurrentCard();
+  persistSessionProgress();
+}
+
+function updateSessionSlider() {
+  const sess = state.session;
+  const slider = document.getElementById('session-slider');
+  const label = document.getElementById('session-slider-label');
+  if (!sess || !slider) return;
+  slider.min = 1;
+  slider.max = sess.queue.length;
+  slider.value = sess.index + 1;
+  if (label) label.textContent = `${sess.index + 1} / ${sess.queue.length}`;
 }
 
 function currentCardId() {
@@ -819,6 +883,7 @@ function renderCurrentCard() {
 
   document.getElementById('progress-counter').textContent = `${sess.index + 1} / ${sess.totalPlanned}`;
   document.getElementById('session-timer').textContent = formatDuration(Date.now() - sess.startedMs);
+  updateSessionSlider();
 
   // Reflect this card's color in the pencil button + card frame tint
   const cs = deck.cardStates[cardId];
@@ -929,6 +994,7 @@ async function gradeCurrent(g) {
   sess.index += 1;
   sess.showingAnswer = false;
   updateUndoButton();
+  await persistSessionProgress();
 
   if (sessionTimeLimitReached()) return finishSession();
   renderCurrentCard();
@@ -971,6 +1037,7 @@ async function undoLastGrade() {
 
   sess.lastGrade = null;
   updateUndoButton();
+  await persistSessionProgress();
   renderCurrentCard();
 }
 
@@ -1045,19 +1112,24 @@ function updateSessionRemainingDisplay() {
 }
 
 // End session → summary toast, then back to home.
+// If the queue is fully consumed we clear the saved resume point; if the user
+// ended mid-queue we keep it so they can pick up next time.
 function finishSession() {
   const sess = state.session;
+  const deckId = state.currentDeck?.id;
   const stats = sess && sess.cardsSeen > 0 ? {
     reviewed: sess.cardsSeen,
     correctPct: Math.round((sess.correct / sess.cardsSeen) * 100),
     timeMs: Date.now() - sess.startedMs,
     breakdown: sess.gradedBreakdown,
   } : null;
+  const queueDone = sess ? sess.index >= sess.queue.length : true;
   releaseMediaUrls();
   state.session = null;
   state.currentDeck = null;
   showScreen('home');
   document.body.classList.remove('study-scrolled');
+  if (queueDone) clearSessionProgress(deckId);
   refreshHome();
   if (stats) showSessionToast(stats);
 }
@@ -1110,6 +1182,14 @@ function bindGlobalKeys() {
   });
   document.getElementById('undo-btn').addEventListener('click', undoLastGrade);
   document.getElementById('replay-btn').addEventListener('click', replayAudio);
+  const slider = document.getElementById('session-slider');
+  // Live label update while dragging; only jump/rerender on release so we
+  // don't rebuild the DOM on every pixel of drag.
+  slider.addEventListener('input', () => {
+    const label = document.getElementById('session-slider-label');
+    if (label && state.session) label.textContent = `${slider.value} / ${state.session.queue.length}`;
+  });
+  slider.addEventListener('change', () => jumpToIndex(parseInt(slider.value, 10) - 1));
   document.getElementById('toast-dismiss').addEventListener('click', () => {
     document.getElementById('session-toast').classList.add('hidden');
   });

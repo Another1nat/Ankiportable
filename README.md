@@ -29,6 +29,7 @@ Ankiportable opens Anki `.apkg` files and gives you the full study loop — card
 - ⌨️ **Full keyboard controls** — Space to flip, 1–4 to grade, R to replay, C to color, Z to undo, Esc to end
 - 📱 **Swipe gestures** on mobile — swipe up to flip, then ← Again · → Good · ↓ Hard · ↑ Easy
 - ↶ **Undo last grade** — because everyone hits the wrong button eventually
+- 🎚️ **Session scrubber slider** — drag to jump to any card in the queue (something Anki proper doesn't have). Close the tab mid-session and the app auto-resumes at the same card next time you open the deck.
 - ⏱️ **Session timer** with optional auto-end after N minutes
 - 🎯 **Configurable daily new-card cap**
 

@@ -324,6 +324,20 @@ button.primary { background: var(--accent); border-color: var(--accent); color: 
   gap: 12px; flex-wrap: wrap;
 }
 .study-toolbar .left, .study-toolbar .right { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+
+.session-scrubber {
+  display: flex; align-items: center; gap: 10px;
+  margin: -4px 0 16px;
+  padding: 6px 10px;
+  background: var(--panel, #1a1d23);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.session-scrubber input[type="range"] { flex: 1; accent-color: var(--accent); cursor: pointer; }
+.session-scrubber .scrubber-label {
+  font-size: 12px; color: var(--text-dim); font-variant-numeric: tabular-nums; min-width: 64px; text-align: right;
+}
+body.study-scrolled .session-scrubber { display: none; }
 #card-color-btn { font-size: 18px; }
 #card-color-btn.has-color::after {
   content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%;
