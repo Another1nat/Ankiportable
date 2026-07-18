@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#14161a" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Ankiportable" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <title>Ankiportable — offline study</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style id="card-css"></style>
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <button id="sidebar-toggle" class="icon-btn" aria-label="Toggle sidebar" title="Toggle sidebar">☰</button>
+      <h1>Ankiportable</h1>
+      <div id="global-stats"></div>
+    </div>
+    <div class="header-right">
+      <label class="setting" title="Max new cards introduced per day. Leave blank = unlimited.">
+        <span>New/day</span>
+        <input id="setting-new-cap" type="number" min="0" placeholder="∞" />
+      </label>
+      <label class="setting" title="Auto-end session after N minutes. Leave blank = unlimited.">
+        <span>Session</span>
+        <input id="setting-session-min" type="number" min="0" placeholder="∞" />
+        <span class="unit">min</span>
+      </label>
+      <div class="volume-control" title="Audio volume">
+        <button id="volume-icon" class="icon-btn" aria-label="Toggle mute">🔊</button>
+        <input id="volume-slider" type="range" min="0" max="100" value="100" />
+      </div>
+    </div>
+  </header>
+
+  <div class="app-shell">
+    <!-- SIDEBAR -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-section">
+        <input id="deck-search" class="deck-search" type="search" placeholder="Search decks…" />
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-heading">
+          <span>Folders</span>
+          <button id="new-folder-btn" class="ghost-btn" title="Create folder">＋</button>
+        </div>
+        <div id="folder-list" class="folder-list"></div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-heading"><span>Filter by color</span></div>
+        <div id="color-filter" class="color-filter"></div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-heading"><span>Sort</span></div>
+        <select id="sort-select" class="sort-select">
+          <option value="manual">Manual (drag to reorder)</option>
+          <option value="name">Name (A→Z)</option>
+          <option value="dateAdded">Date added (newest)</option>
+          <option value="cardCount">Card count (largest)</option>
+          <option value="lastStudied">Last studied (recent)</option>
+          <option value="due">Due count (most due)</option>
+        </select>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-heading"><span>Audio</span></div>
+        <label class="setting inline-setting">
+          <span>Auto-play</span>
+          <select id="audio-autoplay-select" class="mini-select">
+            <option value="answer">Answer side only</option>
+            <option value="both">Both sides</option>
+            <option value="off">Off</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-heading"><span>Progress</span></div>
+        <div class="sidebar-actions">
+          <button id="export-progress-btn" title="Download a JSON backup of all per-card progress">Export progress</button>
+          <button id="import-progress-btn" title="Restore progress from a JSON backup">Restore progress</button>
+          <input id="import-progress-input" type="file" accept=".json" hidden />
+        </div>
+      </div>
+    </aside>
+
+    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
+    <main>
+      <!-- HOME -->
+      <section id="home" class="screen active">
+        <div class="home-toolbar">
+          <button id="import-btn" class="primary">Import .apkg</button>
+          <input id="import-input" type="file" accept=".apkg" multiple hidden />
+          <span id="import-status"></span>
+          <span id="active-filter-label" class="active-filter-label"></span>
+        </div>
+        <div id="deck-list" class="deck-list"></div>
+      </section>
+
+      <!-- STUDY -->
+      <section id="study" class="screen">
+        <div class="study-toolbar">
+          <div class="left">
+            <button id="study-back-btn" title="End session (Esc)">← End</button>
+            <button id="undo-btn" class="icon-btn" aria-label="Undo last grade (Z)" title="Undo last grade (Z)" disabled>↶</button>
+            <span id="progress-counter">0/0</span>
+          </div>
+          <div class="right">
+            <button id="card-color-btn" class="icon-btn" aria-label="Color-code this card (C)" title="Color-code this card (C)">✎</button>
+            <button id="replay-btn" class="icon-btn" aria-label="Replay audio (R)" title="Replay audio (R)">🔊</button>
+            <span id="session-timer">0s</span>
+            <span id="session-remaining" class="hidden"></span>
+          </div>
+        </div>
+
+        <div class="card-wrap">
+          <div id="card-inner" class="card"></div>
+        </div>
+
+        <div id="flip-row" class="flip-row">
+          <button id="flip-btn" class="primary">Show answer <small>(Space)</small></button>
+        </div>
+
+        <div id="grade-row" class="grade-row hidden">
+          <button class="grade-btn again" data-grade="0">Again <small>1 · <span id="preview-again"></span></small></button>
+          <button class="grade-btn hard" data-grade="1">Hard <small>2 · <span id="preview-hard"></span></small></button>
+          <button class="grade-btn good" data-grade="2">Good <small>3 · <span id="preview-good"></span></small></button>
+          <button class="grade-btn easy" data-grade="3">Easy <small>4 · <span id="preview-easy"></span></small></button>
+        </div>
+
+        <div class="keyboard-legend">
+          <kbd>Space</kbd>/<kbd>Enter</kbd> flip &amp; Good ·
+          <kbd>1</kbd> Again · <kbd>2</kbd> Hard · <kbd>3</kbd> Good · <kbd>4</kbd> Easy ·
+          <kbd>R</kbd> replay · <kbd>C</kbd> color · <kbd>Z</kbd> undo · <kbd>Esc</kbd> end
+          <br><span class="touch-only">Swipe up = flip · answer side: ← Again · → Good · ↓ Hard · ↑ Easy</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Session summary toast -->
+  <div id="session-toast" class="session-toast hidden">
+    <div class="toast-content">
+      <div id="toast-title">Session complete</div>
+      <div id="toast-stats"></div>
+    </div>
+    <button id="toast-dismiss" class="toast-dismiss" aria-label="Dismiss">✕</button>
+  </div>
+
+  <!-- Reusable popovers -->
+  <div id="popover" class="popover hidden"></div>
+
+  <!-- Loading overlay -->
+  <div id="loading-overlay" class="loading-overlay hidden" aria-hidden="true">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <div id="loading-msg">Loading…</div>
+    </div>
+  </div>
+
+  <!-- Vendor -->
+  <script src="vendor/jszip.min.js"></script>
+  <script src="vendor/fzstd.js"></script>
+  <!-- Base64-inlined SQLite WASM binary — avoids fetch() so file:// works -->
+  <script src="vendor/sql-wasm-inline.js"></script>
+  <script src="vendor/sql-wasm.js"></script>
+
+  <!-- App -->
+  <script src="js/parser.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/scheduler.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
