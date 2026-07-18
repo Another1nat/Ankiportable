@@ -2,11 +2,13 @@
 
 # 📚 Ankiportable
 
-**An offline, zero-install, Anki-compatible study app that runs anywhere a browser does.**
+**A free, offline, zero-install `.apkg` file reader and Anki-compatible flashcard study app that runs entirely in your browser.**
 
-Open a folder. Study. That's it.
+Open an `.apkg`. Study. That's it — no account, no sync server, no install.
 
-[Live demo →](https://another1nat.github.io/Ankiportable/) · [Install on iPhone](#-install-on-your-phone) · [Install on Android](#-install-on-your-phone)
+### 🌐 **Live site → [another1nat.github.io/Ankiportable](https://another1nat.github.io/Ankiportable/)**
+
+[📱 Install on iPhone](#-install-on-your-phone) · [🤖 Install on Android](#-install-on-your-phone) · [💻 Run locally](#-run-it-locally) · [☁️ Deploy your own](#-deploy)
 
 </div>
 
@@ -14,9 +16,11 @@ Open a folder. Study. That's it.
 
 ## ✨ What it is
 
-Ankiportable opens Anki `.apkg` files and gives you the full study loop — card rendering, images, audio, spaced repetition, persistent progress — with **no install, no account, no sync server, no admin rights**. Everything is HTML + JS + WASM in a single folder. Drop it on your desktop, drop it on GitHub Pages, drop it on your phone's home screen. It just works.
+**Ankiportable is a browser-based `.apkg` file reader and free Anki alternative** that gives you the full flashcard study loop — card rendering, images, audio, spaced repetition, persistent progress — with **no install, no account, no sync server, no admin rights, and zero cost**. Everything is HTML + JS + WASM in a single folder. Drop it on your desktop, host it on GitHub Pages, install it on your phone's home screen as a PWA. It just works — on iPhone, Android, Windows, Mac, and Linux.
 
-> 🎯 **Why it exists:** the official Anki apps require installation and (on iOS) cost money. Ankiportable is the escape hatch: your .apkg + a browser = you're studying.
+> 🎯 **Why it exists:** the official Anki apps require installation, and the iOS app costs $25. Ankiportable is the free, portable, install-free escape hatch: any `.apkg` file + any browser = you're studying spaced repetition flashcards in seconds.
+
+**Keywords:** open Anki apkg online · free apkg file reader · Anki without install · Anki iPhone free · Anki web app · browser flashcards · offline spaced repetition · Anki PWA
 
 ---
 
@@ -211,5 +215,7 @@ MIT — do what you want.
 <div align="center">
 
 Built with ❤️ for people who just want to study without an install screen.
+
+### 🌐 Try it now → [another1nat.github.io/Ankiportable](https://another1nat.github.io/Ankiportable/)
 
 </div>

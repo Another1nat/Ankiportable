@@ -7,12 +7,58 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Ankiportable" />
+
+  <title>Ankiportable — Free Online .apkg File Reader &amp; Offline Anki Flashcard Study App</title>
+  <meta name="description" content="Free, offline, browser-based .apkg file reader and Anki flashcard study app. No install, no account, no sync — open Anki decks and study with spaced repetition on any device. Works on iPhone, Android, Windows, Mac, Linux." />
+  <meta name="keywords" content="apkg reader, apkg file reader, open apkg online, anki apkg viewer, anki online, anki web app, anki flashcards, spaced repetition, offline flashcards, browser flashcards, study app, apkg to browser, anki pwa, free anki alternative, anki iphone free, anki without install" />
+  <meta name="author" content="Ankiportable" />
+  <link rel="canonical" href="https://another1nat.github.io/Ankiportable/" />
+
+  <!-- Open Graph / social share -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Ankiportable" />
+  <meta property="og:title" content="Ankiportable — Free Online .apkg Reader &amp; Anki Study App" />
+  <meta property="og:description" content="Open any Anki .apkg file in your browser. No install, no account, works offline. Free flashcard study with spaced repetition on any device." />
+  <meta property="og:url" content="https://another1nat.github.io/Ankiportable/" />
+  <meta property="og:image" content="https://another1nat.github.io/Ankiportable/icon.svg" />
+
+  <!-- Twitter card -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Ankiportable — Free Online .apkg Reader" />
+  <meta name="twitter:description" content="Open Anki .apkg files in your browser. Offline, no install, free." />
+  <meta name="twitter:image" content="https://another1nat.github.io/Ankiportable/icon.svg" />
+
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <title>Ankiportable — offline study</title>
   <link rel="stylesheet" href="styles.css" />
   <style id="card-css"></style>
+
+  <!-- Structured data: helps Google understand what this page is -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Ankiportable",
+    "description": "Free online .apkg file reader and offline Anki flashcard study app. Runs entirely in the browser with no install, no account, and no sync server. Supports SM-2 spaced repetition, images, audio, and Cloze cards.",
+    "url": "https://another1nat.github.io/Ankiportable/",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Any (browser-based)",
+    "browserRequirements": "Requires JavaScript. Requires HTML5.",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": [
+      "Opens .apkg files (collection.anki2, anki21, anki21b/zstd)",
+      "Offline, installable PWA for iPhone and Android",
+      "SM-2 spaced repetition scheduler",
+      "Session scrubber slider to jump to any card",
+      "Auto-resume interrupted study sessions",
+      "Folders, color-coding, and manual reorder",
+      "Export and restore progress as JSON",
+      "Zero network requests at runtime"
+    ]
+  }
+  </script>
 </head>
 <body>
   <header>
